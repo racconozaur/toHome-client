@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { sendPost } from '../../actions/user'
-import Post from '../Posts/Post'
-import { useDispatch, useSelector } from 'react-redux'
+import { getoneuser } from '../../actions/user'
+import { useDispatch } from 'react-redux'
 import { setAdmin } from '../../reducers/userReducer'
-// import axios from 'axios'
-import { Route, Switch, useParams, useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { BsImage } from 'react-icons/bs'
 import { useTranslation } from 'react-i18next'
-import axios from '../../handlers/axiosHandler'
-import { NavLink } from 'react-router-dom'
-import ButtonFilter from '../../utils/button/ButtonFilter'
-import { useCallback } from 'react'
-import MenuCard from '../AdminPanel/MenuCard'
 import UserPosts from '../Posts/UserPosts'
-import io from 'socket.io-client'
+
+// import io from 'socket.io-client'
 
 // const socket = io.connect('http://localhost:5000')
 
@@ -25,14 +17,14 @@ const User = (props) => {
 
 	const [userInfo, setUserInfo] = useState([])
 
-	const getoneuser = useCallback(async (email) => {
-		try {
-			const res = await axios.get(`getoneuser/${email}`)
-			setUserInfo(res.data)
-		} catch (e) {
-			alert(e.response.data.message)
-		}
-	}, [])
+	// const getoneuser = useCallback(async (email) => {
+	// 	try {
+	// 		const res = await axios.get(`getoneuser/${email}`)
+	// 		setUserInfo(res.data)
+	// 	} catch (e) {
+	// 		alert(e.response.data.message)
+	// 	}
+	// }, [])
 
 	if (userInfo.role === 'admin') {
 		dispatch(setAdmin())
@@ -57,8 +49,11 @@ const User = (props) => {
 	// }, [])
 
 	useEffect(() => {
-		getoneuser(email)
-	}, [getoneuser, email])
+		getoneuser(email).then((res) => setUserInfo(res))
+		return () => {
+			setUserInfo([])
+		}
+	}, [email])
 
 	// test
 	// const [msg, setMsg] = useState('')
@@ -73,8 +68,8 @@ const User = (props) => {
 
 	return (
 		<>
-			<div className=' bg-white w-full container mx-auto py-9 h-full dark:bg-slate-800'>
-				<div className=' w-10/12 h-80 border-2 rounded-xl border-cblue mx-auto px-36 py-8 flex justify-between text-cblue dark:border-white dark:text-slate-50'>
+			<div className=' bg-white w-full h-full min-h-full container mx-auto py-9 dark:bg-slate-800'>
+				<div className=' w-10/12 md:h-80 border-2 rounded-xl border-cblue mx-auto px-4 lg:px-36 py-8 flex flex-col md:flex-row justify-between text-cblue dark:border-white dark:text-slate-50'>
 					<div>
 						<div className='flex items-center'>
 							<div className='flex justify-center items-center bg-slate-50 w-24 h-24 text-slate-800 p-4 rounded-full text-4xl font-bold'>
@@ -96,7 +91,7 @@ const User = (props) => {
 							{t('Registeration Date')}: {userInfo.date}
 						</p>
 					</div>
-					<div className='flex flex-col items-end justify-between'>
+					<div className='flex flex-col-reverse md:items-end justify-between mt-4 md:mt-0'>
 						<div className='flex flex-col'>
 							{userInfo.status === 'active' ? (
 								<Link
@@ -109,7 +104,7 @@ const User = (props) => {
 										},
 									}}
 								>
-									<button className=' w-28 py-3 bg-cyellow rounded-xl mb-4'>
+									<button className=' w-28 py-3 bg-cyellow rounded-xl md:mb-4 my-4'>
 										{t('Add Post')}
 									</button>
 								</Link>
@@ -118,7 +113,7 @@ const User = (props) => {
 							)}
 
 							{userInfo.role === 'admin' ? (
-								<Link to={'/admin'}>
+								<Link to={`/admin`}>
 									<button className=' w-28 py-3 bg-cyellow rounded-xl'>
 										{t('Admin panel')}
 									</button>
@@ -156,6 +151,12 @@ const User = (props) => {
 
 				<UserPosts email={email} />
 			</div>
+
+			{/* <Switch>
+				<Route path={`${path}/admin`}>
+					<MenuCard/>
+				</Route>
+			</Switch> */}
 		</>
 	)
 }

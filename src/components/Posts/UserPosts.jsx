@@ -1,53 +1,39 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import axios from '../../handlers/axiosHandler'
+import React, { useState, useEffect } from 'react'
 import Post from './Post'
-import { AiOutlineUser, AiOutlineFilePpt } from "react-icons/ai";
 import { useTranslation } from 'react-i18next'
+import { getActivePostsFrom, getRewiewPostsFrom } from '../../actions/user'
 
 const UserPosts = (props) => {
 	const [posts, setPosts] = useState([])
-    const [postsState, setPostsState] = useState(true)
+	const [postsState, setPostsState] = useState(true)
 
 	const { t } = useTranslation()
 
-	const getActivePostsFrom = useCallback(async (sender) => {
-		try {
-			const res = await axios.get(`getactivepostsfrom/${sender}`)
-            setPosts([])
-            setPosts(res.data)
-		} catch (e) {
-			alert(e.response.data.message)
-		}
-	}, [])
+	const email = localStorage.getItem('user')
 
-    const getRewiewPostsFrom = useCallback(async (sender) => {
-		try {
-			const res = await axios.get(`getreviewpostsfrom/${sender}`)
-            setPosts([])
-			setPosts(res.data)
-		} catch (e) {
-			alert(e.response.data.message)
-		}
-	}, [])
-
-    const handleActive = (e) => {
-        e.preventDefault()
-        setPostsState(true)
-    }
-    const handleReview = (e) => {
-        e.preventDefault()
-        setPostsState(false)
-    } 
+	const handleActive = (e) => {
+		e.preventDefault()
+		setPostsState(true)
+	}
+	const handleReview = (e) => {
+		e.preventDefault()
+		setPostsState(false)
+	}
 
 	useEffect(() => {
-        if(postsState){
-            getActivePostsFrom(props.email)
-        }
-        else{
-            getRewiewPostsFrom(props.email)
-        }
-		
-	}, [getActivePostsFrom, getRewiewPostsFrom, postsState, props.email])
+		if (postsState) {
+			getActivePostsFrom(email)
+				.then(setPosts([]))
+				.then((res) => setPosts(res))
+		} else {
+			getRewiewPostsFrom(email)
+				.then(setPosts([]))
+				.then((res) => setPosts(res))
+		}
+		return () => {
+			setPosts([])
+		}
+	}, [postsState, email])
 
 	const data = posts.map((e) => {
 		return (
@@ -67,7 +53,7 @@ const UserPosts = (props) => {
 				number={e.number}
 				rooms={e.rooms}
 				moderated={e.moderated}
-                validation={e.validation}
+				validation={e.validation}
 			/>
 		)
 	})
@@ -76,23 +62,30 @@ const UserPosts = (props) => {
 		<div className=' w-2/4 mx-auto '>
 			<div className='flex my-9 border-b-2'>
 				<button
-					className={`mx-4 py-2 ${postsState ? 'border-cblue border-b-2 text-cyellow dark:border-white' : ''}`}
-                    onClick={handleActive}
+					className={`mx-4 py-2 ${
+						postsState
+							? 'border-cblue border-b-2 text-cyellow dark:border-white'
+							: ''
+					}`}
+					onClick={handleActive}
 				>
-					{t("Active Posts")}
+					{t('Active Posts')}
 				</button>
 				<button
-					className={`mx-4 py-2 ${!postsState ? 'border-cblue border-b-2 text-cyellow dark:border-white' : ''}`}
-                    onClick={handleReview}
+					className={`mx-4 py-2 ${
+						!postsState
+							? 'border-cblue border-b-2 text-cyellow dark:border-white'
+							: ''
+					}`}
+					onClick={handleReview}
 				>
-					{t("On Moderation")}
+					{t('On Moderation')}
 				</button>
 			</div>
 			<h2 className=' text-black text-2xl font-medium ml-4 my-9 dark:text-slate-50'>
 				{t('Your posts')}
 			</h2>
-            <div className=' w-full'>{data.reverse()}</div>
-            
+			<div className=' w-full'>{data.reverse()}</div>
 		</div>
 	)
 }

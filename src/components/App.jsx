@@ -14,12 +14,10 @@ import MenuCard from './AdminPanel/MenuCard'
 import useLocalstorage from '../hooks/use-localstorage'
 import i18n from '../i18n'
 import AddPost from './Posts/AddPost'
-import ValidatePosts from './AdminPanel/ValidatePostsList'
-import DefaultView from './Posts/DefaultView'
-import MapView from './Posts/MapView'
 
 function App() {
 	const isAuth = useSelector((state) => state.user.isAuth)
+	const isAdmin = useSelector((state) => state.user.isAdmin)
 
 	const dispatch = useDispatch()
 
@@ -50,21 +48,15 @@ function App() {
 				handleLenguageChange={handleLenguageChange}
 				language={language}
 			/>
-			<main className='px-4 mt-[70px] lg:px-0 '>
+			<main className='px-4 mt-[70px] lg:px-0 h-full'>
 				{!isAuth && (
 					<Switch>
 						<Route path='/' exact>
 							<Redirect to='/all' />
 						</Route>
-						<Route path='/all' >
+						<Route path='/all'>
 							<PostsWrapper />
 						</Route>
-						{/* <Route path={`/all/posts`}>
-							<DefaultView />
-						</Route>
-						<Route path={`/all/map`}>
-							<MapView />
-						</Route> */}
 						<Route path='/registration' component={Registration} />
 						<Route path='/login' component={Login} />
 
@@ -92,31 +84,15 @@ function App() {
 						<Route path='/postinfo'>
 							<PostDescription />
 						</Route>
-						{/* {
-							isAdmin ? (
-						
-									<Route path={'/admin'}>
-										<MenuCard/>
-									</Route>
-								
-							) : null
-						} */}
-						<Route path={'/admin'}>
+						{isAdmin &&
+						 <Route path={'/admin'}>
 							<MenuCard />
-						</Route>
+						</Route> }
 
 						<Route path='*' component={NotFound} />
 					</Switch>
 				)}
 
-				{/* {isAdmin && isAuth ? (
-					<Switch>
-						<Route path={'/admin'}>
-							<MenuCard/>
-						</Route>
-			
-					</Switch>
-				) : null} */}
 			</main>
 		</BrowserRouter>
 	)

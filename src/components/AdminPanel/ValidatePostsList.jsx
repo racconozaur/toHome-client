@@ -1,60 +1,71 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import axios from '../../handlers/axiosHandler';
-import PostInfo from './PostInfo';
+import React, { useEffect, useState } from 'react'
+import PostInfo from './PostInfo'
+import { getAllNotActivePosts } from '../../actions/user'
 
 const ValidatePosts = () => {
+	const [validatePosts, setValidatedPosts] = useState([])
 
-    const [validatePosts, setValidatedPosts] = useState([])
+	useEffect(() => {
+		getAllNotActivePosts().then((res) => setValidatedPosts(res))
+		return () => {
+			setValidatedPosts([])
+		}
+	}, [])
 
-    const getAllNotActivePosts = useCallback(async () => {
-        try {
-            const res = await axios.get(`allnotactiveposts`,
+	const handlePostChange = (data, id) => {
+		const newData = validatePosts.map((prevObj) => {
+			if (prevObj._id === id) {
+				return data
+			}
+			return prevObj
+		})
 
-                    {headers:{Authorization:`Bearer ${localStorage.getItem('token')}`}}
-        )
-            setValidatedPosts(res.data)
-            return res.data
-        } catch (e) {
-            console.log(e);
-        }
-    }, [])
+		setValidatedPosts(newData)
+		console.log(validatePosts)
+	}
 
-    useEffect(() => {
-        getAllNotActivePosts()
-        
+	const allNotModeratedPosts = validatePosts.map((e) => {
+		if (e.validation === 'under review') {
+			return (
+				<PostInfo
+					key={e._id}
+					id={e._id}
+					name={e.name}
+					sender={e.sender}
+					title={e.title}
+					content={e.content}
+					img={e.image}
+					location={e.location}
+					price={e.price}
+					square={e.square}
+					status={e.status}
+					type={e.type}
+					likes={e.likes}
+					number={e.number}
+					rooms={e.rooms}
+					moderated={e.moderated}
+					handlePostChange={handlePostChange}
+				/>
+			)
+		}
+		return (
+			<div className=' flex justify-center mt-10'>
+				No unmoderated posts yet
+			</div>
+		)
+	})
 
-    }, [getAllNotActivePosts])
+	return (
+		<div className='flex flex-col w-10/12 ml-60 -z-10'>
+			{validatePosts.length === 0 ? (
+				<div className=' flex justify-center mt-10'>
+					No unmoderated posts yet
+				</div>
+			) : (
+				allNotModeratedPosts
+			)}
+		</div>
+	)
+}
 
-    console.log(validatePosts);
-
-    const  allNotModeratedPosts = validatePosts.map(e => {
-            return (
-                <PostInfo
-                    key={e._id}
-                    id={e._id}
-                    name={e.name}
-                    sender={e.sender}
-                    title={e.title}
-                    content={e.content}
-                    img={e.image}
-                    location={e.location}
-                    price={e.price}
-                    square={e.square}
-                    status={e.status}
-                    type={e.type}
-                    likes={e.likes}
-                    number={e.number}
-                    rooms={e.rooms}
-                    moderated={e.moderated}
-                />
-            )
-    })
-
-    return (
-        <div className='flex flex-col w-10/12 ml-60 -z-10'>
-            {allNotModeratedPosts}
-        </div>
-    );
-};
-
-export default ValidatePosts;
+export default ValidatePosts
